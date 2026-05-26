@@ -1,5 +1,393 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        
-    </head>
+<head>
+<title>Phone System</title>
+
+<style>
+
+body{
+  background:#111;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+/* PHONE */
+.phone{
+  width:360px;
+  height:760px;
+  background:#000;
+  border-radius:40px;
+  border:6px solid #444;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 50px #000;
+}
+
+/* STATUS BAR */
+.statusBar{
+  position:absolute;
+  top:8px;
+  width:100%;
+  padding:0 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:white;
+  font-size:16px;
+  z-index:5;
+}
+
+.statusRight{ display:flex; gap:12px; }
+
+/* SCREEN */
+.screen{ width:100%; height:100%; background:#000; }
+
+/* NOTCH */
+.notch{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:200px;
+  height:40px;
+  background:#000;
+  border-bottom-left-radius:25px;
+  border-bottom-right-radius:25px;
+  z-index:4;
+}
+
+/* BUTTONS */
+.powerBtn,.volUp,.volDown{
+  position:absolute;
+  width:22px;
+  height:50px;
+  background:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  user-select:none;
+}
+
+.powerBtn{ top:120px; right:-6px; }
+.volUp{ top:170px; right:-6px; }
+.volDown{ top:220px; right:-6px; }
+
+/* PAGES */
+.page{ width:100%; height:100%; display:none; }
+
+/* LOCK SCREEN */
+.lockScreen{
+ background:url("https://images.unsplash.com/photo-1503264116251-35a269479413");
+ background-size:cover;
+ color:white;
+ text-align:center;
+ padding-top:150px;
+ font-family:Arial;
+}
+.lockScreen h1{ font-size:50px; margin:0; }
+.arrow{ margin-top:200px; font-size:45px; animation: up 1.5s infinite; cursor:pointer; }
+
+/* PASSWORD PAGE */
+.passwordPage{
+ background:url("https://images.unsplash.com/photo-1525182008055-f88b95ff7980");
+ background-size:cover;
+ text-align:center;
+ color:white;
+ padding-top:140px;
+ font-family:Arial;
+}
+
+.hiddenBox{
+ width:220px; height:45px;
+ margin:auto;
+ border-radius:10px;
+ background:rgba(0,0,0,0.6);
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:8px;
+}
+
+.dot{ width:12px; height:12px; border-radius:50%; background:white; }
+
+.keypad button{
+ width:80px; height:80px;
+ margin:5px;
+ border-radius:50%;
+ border:none;
+ font-size:27px;
+ cursor:pointer;
+}
+.message{ margin-top:10px; color:#ff4444; height:20px; }
+
+/* HOME SCREEN */
+.home{
+ background:url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee");
+ background-size:cover;
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ gap:25px;
+ padding-top:120px;
+}
+
+.app{
+ width:95px;
+ height:95px;
+ border-radius:18px;
+ background:#ffffffd9;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ cursor:pointer;
+ font-family:Arial;
+ font-size:14px;
+}
+
+/* FULL APP POPUP */
+.popup{
+ position:absolute;
+ top:0;
+ left:0;
+ width:100%;
+ height:100%;
+ background:#000;
+ display:none;
+ flex-direction:column;
+ align-items:center;
+ justify-content:flex-start;
+ color:white;
+ font-family:Arial;
+ padding-top:80px;
+}
+
+/* GALLERY GRID */
+.gallery{
+ width:100%;
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+ padding:15px;
+}
+.gallery img{
+ width:100%;
+ height:140px;
+ border-radius:15px;
+ object-fit:cover;
+}
+
+/* YOUTUBE */
+.video{
+ width:90%;
+ height:200px;
+ border-radius:15px;
+ margin:10px 0;
+}
+
+/* NAV */
+.nav{
+ position:absolute;
+ bottom:15px;
+ width:100%;
+ display:flex;
+ justify-content:space-around;
+ color:white;
+ font-size:22px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+<div class="statusBar">
+  <span>📶 LTE</span>
+  <div class="statusRight">
+    <span>🔋 100%</span>
+  </div>
+</div>
+
+<div class="notch"></div>
+
+<div class="powerBtn" onclick="powerToggle()">⏻</div>
+<div class="volUp" onclick="volumeUp()">+</div>
+<div class="volDown" onclick="volumeDown()">−</div>
+
+<div id="screen" class="screen">
+
+<!-- LOCK -->
+<div id="lock" class="page lockScreen">
+<h1 id="time"></h1>
+<p id="date"></p>
+<div class="arrow" onclick="showPassword()">⬆</div>
+</div>
+
+<!-- PASSWORD -->
+<div id="password" class="page passwordPage">
+<h2>Enter Password</h2>
+<div class="hiddenBox" id="dotsBox"></div>
+<div class="message" id="msg"></div>
+
+<div class="keypad">
+<button onclick="press(1)">1</button>
+<button onclick="press(2)">2</button>
+<button onclick="press(3)">3</button><br>
+<button onclick="press(4)">4</button>
+<button onclick="press(5)">5</button>
+<button onclick="press(6)">6</button><br>
+<button onclick="press(7)">7</button>
+<button onclick="press(8)">8</button>
+<button onclick="press(9)">9</button><br>
+<button onclick="clearPass()">←</button>
+<button onclick="press(0)">0</button>
+<button onclick="clearAll()">✖</button>
+</div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page home">
+
+<div class="app" onclick="openApp('gallery')">Gallery</div>
+<div class="app" onclick="openApp('youtube')">YouTube</div>
+
+<div class="popup" id="popup">
+
+<div id="galleryApp" style="display:none;">
+<h2>Gallery</h2>
+
+<div class="gallery">
+<img src="https://
+<img src="https:c:\Users\joseph\Pictures\ESRAER.jpg
+<img src="https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0">
+<img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e">
+</div>
+</div>
+
+<div id="youtubeApp" style="display:none;">
+<h2>YouTube</h2>
+
+<iframe class="video"
+src="https://www.youtube.com/embed/tAGnKpE4NCI"
+allowfullscreen></iframe>
+
+<iframe class="video"
+src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+allowfullscreen></iframe>
+
+</div>
+
+</div>
+
+<div class="nav">
+<span onclick="recent()">▢</span>
+<span onclick="goHome()">⬤</span>
+<span onclick="goBack()">◀</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+let power=true;
+let pass="";
+const realPass="118822";
+
+/* POWER */
+function powerToggle(){
+ power=!power;
+ showPage(power?"lock":null);
+}
+
+/* VOLUME (demo only) */
+function volumeUp(){}
+function volumeDown(){}
+
+/* PAGES */
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+ if(id) document.getElementById(id).style.display="block";
+}
+
+function showPassword(){
+ showPage("password");
+ pass="";
+ updateDots();
+}
+
+/* PASSWORD */
+function press(n){
+ if(pass.length<6){
+  pass+=n;
+  updateDots();
+ }
+ if(pass.length===6){
+  if(pass===realPass){
+   msg.style.color="lightgreen";
+   msg.innerText="Unlocked!";
+   setTimeout(()=>showPage("home"),500);
+  }else{
+   msg.innerText="Wrong Password";
+   pass="";
+   setTimeout(()=>{msg.innerText="";updateDots();},700);
+  }
+ }
+}
+
+function clearPass(){ pass=pass.slice(0,-1); updateDots(); }
+function clearAll(){ pass=""; msg.innerText=""; updateDots(); }
+
+function updateDots(){
+ let box=document.getElementById("dotsBox");
+ box.innerHTML="";
+ for(let i=0;i<pass.length;i++){
+ let d=document.createElement("div");
+ d.className="dot";
+ box.appendChild(d);
+ }
+}
+
+/* OPEN APPS */
+function openApp(n){
+ let popup=document.getElementById("popup");
+ popup.style.display="flex";
+
+ document.getElementById("galleryApp").style.display="none";
+ document.getElementById("youtubeApp").style.display="none";
+
+ if(n==="gallery") document.getElementById("galleryApp").style.display="block";
+ if(n==="youtube") document.getElementById("youtubeApp").style.display="block";
+}
+
+function goBack(){
+ document.getElementById("popup").style.display="none";
+}
+
+function goHome(){
+ showPage("home");
+ goBack();
+}
+
+function recent(){
+ alert("Recent Apps Coming Soon");
+}
+
+/* CLOCK */
+setInterval(()=>{
+ let d=new Date();
+ time.innerText=d.getHours().toString().padStart(2,"0")+":"+
+ d.getMinutes().toString().padStart(2,"0");
+ date.innerText=d.toDateString();
+},1000);
+
+showPage("lock");
+
+</script>
+
+</body>
 </html>
